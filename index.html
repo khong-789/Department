@@ -1,0 +1,752 @@
+นี่คือโครงสร้างฐานข้อมูล Google Sheet ที่แนะนำสำหรับระบบตรวจเช็คสต็อกอุปกรณ์ในแผนกวิสัญญีของคุณ:
+
+1. ชีต: อุปกรณ์วิสัญญี (Anesthesia Equipment)
+ชีตนี้จะใช้สำหรับจัดเก็บข้อมูลรายละเอียดของอุปกรณ์แต่ละชิ้น
+
+ชื่อคอลัมน์ (ภาษาไทย)
+
+ชื่อคอลัมน์ (ภาษาอังกฤษ)
+
+ประเภทข้อมูล
+
+คำอธิบาย
+
+การจัดการอุปกรณ์
+
+
+
+
+
+
+
+คุณต้องการสร้างระบบจัดการอุปกรณ์ในแผนกวิสัญญีใช่หรือไม่? ระบบนี้จะช่วยให้คุณสามารถ:
+
+บันทึกข้อมูลอุปกรณ์ทั้งหมดในแผนกวิสัญญี โดยแยกเป็นหมวดหมู่ต่างๆ เช่น เครื่องดมยาสลบ, monitor, เสาน้ำเกลือ, srying pump, เตียง, เครื่องเจาะ DTX, emergency car, laryngoscope
+
+ระบุรายละเอียดของอุปกรณ์แต่ละชิ้น เช่น หมายเลขเครื่อง, ตำแหน่งที่ประจำอยู่
+
+ติดตามข้อมูลการบำรุงรักษา (Maintenance) และการสอบเทียบ (Calibration) พร้อมระบุช่วงเวลา
+
+บันทึกสถานะของอุปกรณ์ (พร้อมใช้งาน, ชำรุด, กำลังซ่อม) และรายละเอียดการส่งซ่อม
+
+เพิ่มรูปภาพประกอบสำหรับอุปกรณ์แต่ละชิ้น
+
+ดูภาพรวมจำนวนอุปกรณ์ที่พร้อมใช้งาน, ชำรุด, และกำลังซ่อม
+
+ดูภาพรวมรายเดือนของสถานะอุปกรณ์
+
+สามารถพิมพ์รายงานออกมาได้
+
+โครงสร้าง Google Sheet ที่แนะนำ:
+
+เพื่อรองรับข้อมูลเหล่านี้ คุณสามารถสร้าง Google Sheet ที่มีชีต (Sheet) และคอลัมน์ (Column) ดังต่อไปนี้:
+
+1. ชีต: อุปกรณ์วิสัญญี (Anesthesia Equipment)
+ชีตนี้จะเก็บข้อมูลหลักของอุปกรณ์แต่ละชิ้น
+
+ชื่อคอลัมน์ (ภาษาไทย)
+
+ชื่อคอลัมน์ (ภาษาอังกฤษ)
+
+ประเภทข้อมูล
+
+คำอธิบาย
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบจัดการอุปกรณ์แผนกวิสัญญี</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #f3f4f6;
+            color: #374151;
+        }
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 800px;
+            position: relative;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #e5e7eb;
+            color: #1f2937;
+        }
+        .action-icon {
+            cursor: pointer;
+            margin-right: 8px;
+            color: #4b5563;
+        }
+        .action-icon:hover {
+            color: #1f2937;
+        }
+        .button-primary {
+            background-color: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button-primary:hover {
+            background-color: #2563eb;
+        }
+        .button-secondary {
+            background-color: #6b7280;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .button-secondary:hover {
+            background-color: #4b5563;
+        }
+        .input-field {
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .header-link {
+            padding: 10px 15px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        .header-link:hover {
+            background-color: #e5e7eb;
+        }
+        .header-link.active {
+            background-color: #d1d5db;
+            font-weight: bold;
+        }
+        .message-box {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1001;
+            text-align: center;
+        }
+        .message-box button {
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body class="p-6">
+    <!-- Header -->
+    <header class="bg-white shadow-md rounded-lg p-4 flex justify-center space-x-4 mb-6">
+        <a id="manage-equipment-link" class="header-link active">จัดการอุปกรณ์</a>
+        <a id="equipment-overview-link" class="header-link">ภาพรวมอุปกรณ์</a>
+        <a id="reports-link" class="header-link">รายงาน</a>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="bg-white shadow-md rounded-lg p-6">
+        <!-- Content will be loaded here by JavaScript -->
+    </main>
+
+    <!-- Modals -->
+
+    <!-- Manage Equipment Modal -->
+    <div id="manageEquipmentModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('manageEquipmentModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">จัดการอุปกรณ์</h2>
+            <button class="button-primary mb-4" onclick="openModal('equipmentFormModal', true)">
+                <i class="fas fa-plus-circle mr-2"></i>เพิ่มอุปกรณ์ใหม่
+            </button>
+            <div class="overflow-x-auto">
+                <table id="equipmentTable">
+                    <thead>
+                        <tr>
+                            <th>หมวดหมู่</th>
+                            <th>ชื่ออุปกรณ์</th>
+                            <th>หมายเลขเครื่อง</th>
+                            <th>ประจำอยู่ที่</th>
+                            <th>Maintenance</th>
+                            <th>Calibration</th>
+                            <th>สถานะ</th>
+                            <th>จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Equipment rows will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Equipment Form Modal (Add/Edit) -->
+    <div id="equipmentFormModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeModal('equipmentFormModal')">&times;</span>
+            <h2 id="equipmentFormTitle" class="text-2xl font-bold mb-4">เพิ่มอุปกรณ์ใหม่</h2>
+            <form id="equipmentForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="hidden" id="equipmentId">
+                <div class="form-group">
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-1">หมวดหมู่</label>
+                    <select id="category" class="input-field" required>
+                        <option value="">เลือกหมวดหมู่</option>
+                        <option value="เครื่องดมยาสลบ">เครื่องดมยาสลบ</option>
+                        <option value="monitor">monitor</option>
+                        <option value="เสาน้ำเกลือ">เสาน้ำเกลือ</option>
+                        <option value="srying pump">srying pump</option>
+                        <option value="เตียง">เตียง</option>
+                        <option value="เครื่องเจาะ DTX">เครื่องเจาะ DTX</option>
+                        <option value="emergency car">emergency car</option>
+                        <option value="laryngoscope">laryngoscope</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="equipmentName" class="block text-sm font-medium text-gray-700 mb-1">ชื่ออุปกรณ์</label>
+                    <input type="text" id="equipmentName" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="serialNumber" class="block text-sm font-medium text-gray-700 mb-1">หมายเลขเครื่อง</label>
+                    <input type="text" id="serialNumber" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="location" class="block text-sm font-medium text-gray-700 mb-1">ประจำอยู่ที่</label>
+                    <input type="text" id="location" class="input-field" required>
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceStart" class="block text-sm font-medium text-gray-700 mb-1">Maintenance เริ่ม</label>
+                    <input type="date" id="maintenanceStart" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="maintenanceEnd" class="block text-sm font-medium text-gray-700 mb-1">Maintenance สิ้นสุด</label>
+                    <input type="date" id="maintenanceEnd" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="calibrationStart" class="block text-sm font-medium text-gray-700 mb-1">Calibration เริ่ม</label>
+                    <input type="date" id="calibrationStart" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="calibrationEnd" class="block text-sm font-medium text-gray-700 mb-1">Calibration สิ้นสุด</label>
+                    <input type="date" id="calibrationEnd" class="input-field">
+                </div>
+                <div class="form-group">
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">สถานะ</label>
+                    <select id="status" class="input-field" required>
+                        <option value="พร้อมใช้งาน">พร้อมใช้งาน</option>
+                        <option value="ชำรุด">ชำรุด</option>
+                        <option value="กำลังซ่อม">กำลังซ่อม</option>
+                    </select>
+                </div>
+                <div id="repairNotesGroup" class="form-group col-span-1 md:col-span-2">
+                    <label for="repairNotes" class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุส่งซ่อม</label>
+                    <textarea id="repairNotes" class="input-field h-24"></textarea>
+                </div>
+                <div class="form-group col-span-1 md:col-span-2">
+                    <label for="equipmentImage" class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ</label>
+                    <input type="file" id="equipmentImage" accept="image/*" class="input-field">
+                    <img id="imagePreview" src="" alt="Image Preview" class="mt-2 hidden max-w-xs rounded-lg shadow-md">
+                </div>
+                <div class="form-group">
+                    <label for="dateRecorded" class="block text-sm font-medium text-gray-700 mb-1">ลงวันที่</label>
+                    <input type="date" id="dateRecorded" class="input-field" required>
+                </div>
+                <div class="col-span-1 md:col-span-2 flex justify-end space-x-4 mt-4">
+                    <button type="button" class="button-secondary" onclick="closeModal('equipmentFormModal')">ยกเลิก</button>
+                    <button type="submit" class="button-primary">บันทึก</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Message Box -->
+    <div id="messageBox" class="message-box">
+        <p id="messageText" class="text-lg"></p>
+        <button class="button-primary" onclick="hideMessageBox()">ตกลง</button>
+    </div>
+
+    <script>
+        // In-memory data storage (simulating Google Sheet)
+        let equipmentData = [];
+        let currentEditingEquipmentId = null;
+
+        // Predefined categories and statuses for dropdowns
+        const categories = ["เครื่องดมยาสลบ", "monitor", "เสาน้ำเกลือ", "srying pump", "เตียง", "เครื่องเจาะ DTX", "emergency car", "laryngoscope"];
+        const statuses = ["พร้อมใช้งาน", "ชำรุด", "กำลังซ่อม"];
+
+        // DOM Elements
+        const mainContent = document.getElementById('main-content');
+        const manageEquipmentLink = document.getElementById('manage-equipment-link');
+        const equipmentOverviewLink = document.getElementById('equipment-overview-link');
+        const reportsLink = document.getElementById('reports-link');
+
+        const manageEquipmentModal = document.getElementById('manageEquipmentModal');
+        const equipmentFormModal = document.getElementById('equipmentFormModal');
+        const equipmentForm = document.getElementById('equipmentForm');
+        const equipmentTableBody = document.getElementById('equipmentTable').getElementsByTagName('tbody')[0];
+        const equipmentFormTitle = document.getElementById('equipmentFormTitle');
+        const repairNotesGroup = document.getElementById('repairNotesGroup');
+        const statusSelect = document.getElementById('status');
+        const equipmentImageInput = document.getElementById('equipmentImage');
+        const imagePreview = document.getElementById('imagePreview');
+        const dateRecordedInput = document.getElementById('dateRecorded');
+
+        const messageBox = document.getElementById('messageBox');
+        const messageText = document.getElementById('messageText');
+
+        // Initial content load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadManageEquipmentContent();
+            // Set current date for dateRecorded input
+            const today = new Date();
+            dateRecordedInput.value = today.toISOString().split('T')[0];
+        });
+
+        // Event Listeners for Header Navigation
+        manageEquipmentLink.addEventListener('click', () => {
+            setActiveLink(manageEquipmentLink);
+            loadManageEquipmentContent();
+        });
+        equipmentOverviewLink.addEventListener('click', () => {
+            setActiveLink(equipmentOverviewLink);
+            loadEquipmentOverviewContent();
+        });
+        reportsLink.addEventListener('click', () => {
+            setActiveLink(reportsLink);
+            loadReportsContent();
+        });
+
+        // Set active link in header
+        function setActiveLink(activeElement) {
+            document.querySelectorAll('.header-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            activeElement.classList.add('active');
+        }
+
+        // --- Modal Functions ---
+        function openModal(modalId, isNew = false) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex'; // Use flex to center
+            if (modalId === 'equipmentFormModal') {
+                if (isNew) {
+                    equipmentFormTitle.textContent = 'เพิ่มอุปกรณ์ใหม่';
+                    equipmentForm.reset();
+                    document.getElementById('equipmentId').value = '';
+                    currentEditingEquipmentId = null;
+                    imagePreview.src = '';
+                    imagePreview.classList.add('hidden');
+                    // Set current date for dateRecorded input
+                    const today = new Date();
+                    dateRecordedInput.value = today.toISOString().split('T')[0];
+                }
+                toggleRepairNotesVisibility(); // Ensure initial visibility is correct
+            }
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'none';
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target == manageEquipmentModal) {
+                manageEquipmentModal.style.display = "none";
+            }
+            if (event.target == equipmentFormModal) {
+                equipmentFormModal.style.display = "none";
+            }
+        }
+
+        // --- Message Box Functions ---
+        function showMessageBox(message, type = 'info') {
+            messageText.textContent = message;
+            messageBox.style.display = 'block';
+            // You can add styling based on type (e.g., success, error) here
+            // For simplicity, just showing the message.
+        }
+
+        function hideMessageBox() {
+            messageBox.style.display = 'none';
+        }
+
+        // --- Equipment Management Functions ---
+
+        // Toggle repair notes visibility based on status
+        statusSelect.addEventListener('change', toggleRepairNotesVisibility);
+
+        function toggleRepairNotesVisibility() {
+            if (statusSelect.value === 'ชำรุด' || statusSelect.value === 'กำลังซ่อม') {
+                repairNotesGroup.style.display = 'block';
+            } else {
+                repairNotesGroup.style.display = 'none';
+                document.getElementById('repairNotes').value = ''; // Clear notes if not applicable
+            }
+        }
+
+        // Handle image preview
+        equipmentImageInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                imagePreview.src = '';
+                imagePreview.classList.add('hidden');
+            }
+        });
+
+        // Add/Edit Equipment Form Submission
+        equipmentForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const id = document.getElementById('equipmentId').value || `eq-${Date.now()}`;
+            const category = document.getElementById('category').value;
+            const equipmentName = document.getElementById('equipmentName').value;
+            const serialNumber = document.getElementById('serialNumber').value;
+            const location = document.getElementById('location').value;
+            const maintenanceStart = document.getElementById('maintenanceStart').value;
+            const maintenanceEnd = document.getElementById('maintenanceEnd').value;
+            const calibrationStart = document.getElementById('calibrationStart').value;
+            const calibrationEnd = document.getElementById('calibrationEnd').value;
+            const status = document.getElementById('status').value;
+            const repairNotes = document.getElementById('repairNotes').value;
+            const dateRecorded = document.getElementById('dateRecorded').value;
+            const imageUrl = imagePreview.src; // Store base64 or URL
+
+            const newEquipment = {
+                id,
+                category,
+                equipmentName,
+                serialNumber,
+                location,
+                maintenanceStart,
+                maintenanceEnd,
+                calibrationStart,
+                calibrationEnd,
+                status,
+                repairNotes: (status === 'ชำรุด' || status === 'กำลังซ่อม') ? repairNotes : '',
+                imageUrl,
+                dateRecorded
+            };
+
+            if (currentEditingEquipmentId) {
+                // Edit existing equipment
+                const index = equipmentData.findIndex(eq => eq.id === currentEditingEquipmentId);
+                if (index !== -1) {
+                    equipmentData[index] = newEquipment;
+                    showMessageBox('แก้ไขข้อมูลอุปกรณ์เรียบร้อยแล้ว!');
+                }
+            } else {
+                // Add new equipment
+                equipmentData.push(newEquipment);
+                showMessageBox('เพิ่มอุปกรณ์ใหม่เรียบร้อยแล้ว!');
+            }
+
+            renderEquipmentTable();
+            closeModal('equipmentFormModal');
+            openModal('manageEquipmentModal'); // Re-open manage equipment modal
+        });
+
+        // Render Equipment Table
+        function renderEquipmentTable() {
+            equipmentTableBody.innerHTML = ''; // Clear existing rows
+
+            equipmentData.forEach(equipment => {
+                const row = equipmentTableBody.insertRow();
+                row.insertCell().textContent = equipment.category;
+                row.insertCell().textContent = equipment.equipmentName;
+                row.insertCell().textContent = equipment.serialNumber;
+                row.insertCell().textContent = equipment.location;
+                row.insertCell().textContent = `${equipment.maintenanceStart || '-'} - ${equipment.maintenanceEnd || '-'}`;
+                row.insertCell().textContent = `${equipment.calibrationStart || '-'} - ${equipment.calibrationEnd || '-'}`;
+                row.insertCell().textContent = equipment.status;
+
+                const actionsCell = row.insertCell();
+                const editIcon = document.createElement('i');
+                editIcon.className = 'fas fa-edit action-icon text-blue-500 hover:text-blue-700';
+                editIcon.title = 'แก้ไข';
+                editIcon.onclick = () => editEquipment(equipment.id);
+                actionsCell.appendChild(editIcon);
+
+                const deleteIcon = document.createElement('i');
+                deleteIcon.className = 'fas fa-trash-alt action-icon text-red-500 hover:text-red-700';
+                deleteIcon.title = 'ลบ';
+                deleteIcon.onclick = () => deleteEquipment(equipment.id);
+                actionsCell.appendChild(deleteIcon);
+            });
+        }
+
+        // Edit Equipment
+        function editEquipment(id) {
+            currentEditingEquipmentId = id;
+            const equipment = equipmentData.find(eq => eq.id === id);
+
+            if (equipment) {
+                equipmentFormTitle.textContent = 'แก้ไขข้อมูลอุปกรณ์';
+                document.getElementById('equipmentId').value = equipment.id;
+                document.getElementById('category').value = equipment.category;
+                document.getElementById('equipmentName').value = equipment.equipmentName;
+                document.getElementById('serialNumber').value = equipment.serialNumber;
+                document.getElementById('location').value = equipment.location;
+                document.getElementById('maintenanceStart').value = equipment.maintenanceStart;
+                document.getElementById('maintenanceEnd').value = equipment.maintenanceEnd;
+                document.getElementById('calibrationStart').value = equipment.calibrationStart;
+                document.getElementById('calibrationEnd').value = equipment.calibrationEnd;
+                document.getElementById('status').value = equipment.status;
+                document.getElementById('repairNotes').value = equipment.repairNotes;
+                document.getElementById('dateRecorded').value = equipment.dateRecorded;
+
+                if (equipment.imageUrl) {
+                    imagePreview.src = equipment.imageUrl;
+                    imagePreview.classList.remove('hidden');
+                } else {
+                    imagePreview.src = '';
+                    imagePreview.classList.add('hidden');
+                }
+
+                toggleRepairNotesVisibility(); // Update visibility based on loaded status
+                closeModal('manageEquipmentModal');
+                openModal('equipmentFormModal');
+            }
+        }
+
+        // Delete Equipment
+        function deleteEquipment(id) {
+            showMessageBox('คุณต้องการลบอุปกรณ์นี้ใช่หรือไม่?', 'confirm'); // Use message box for confirmation
+            messageBox.querySelector('button').onclick = () => {
+                equipmentData = equipmentData.filter(eq => eq.id !== id);
+                renderEquipmentTable();
+                hideMessageBox();
+                showMessageBox('ลบอุปกรณ์เรียบร้อยแล้ว!');
+            };
+            // Add a cancel button to the message box for confirmation
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'button-secondary ml-4';
+            cancelButton.textContent = 'ยกเลิก';
+            cancelButton.onclick = () => hideMessageBox();
+            messageBox.appendChild(cancelButton);
+        }
+
+        // --- Content Loading Functions ---
+
+        function loadManageEquipmentContent() {
+            mainContent.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">จัดการอุปกรณ์ในแผนกวิสัญญี</h1>
+                <p class="mb-4">คลิก "จัดการอุปกรณ์" เพื่อดูรายการและเพิ่ม/แก้ไข/ลบอุปกรณ์</p>
+                <button class="button-primary" onclick="openModal('manageEquipmentModal')">
+                    <i class="fas fa-cogs mr-2"></i>จัดการอุปกรณ์
+                </button>
+            `;
+            renderEquipmentTable(); // Ensure table is rendered when modal is opened
+        }
+
+        function loadEquipmentOverviewContent() {
+            const total = equipmentData.length;
+            const ready = equipmentData.filter(eq => eq.status === 'พร้อมใช้งาน').length;
+            const damaged = equipmentData.filter(eq => eq.status === 'ชำรุด').length;
+            const underRepair = equipmentData.filter(eq => eq.status === 'กำลังซ่อม').length;
+
+            // Simulate monthly overview (simple text for demonstration)
+            const monthlyData = {};
+            equipmentData.forEach(eq => {
+                const date = new Date(eq.dateRecorded);
+                const monthYear = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
+                if (!monthlyData[monthYear]) {
+                    monthlyData[monthYear] = { total: 0, ready: 0, damaged: 0, underRepair: 0 };
+                }
+                monthlyData[monthYear].total++;
+                if (eq.status === 'พร้อมใช้งาน') monthlyData[monthYear].ready++;
+                if (eq.status === 'ชำรุด') monthlyData[monthYear].damaged++;
+                if (eq.status === 'กำลังซ่อม') monthlyData[monthYear].underRepair++;
+            });
+
+            let monthlyOverviewHtml = '<h3 class="text-xl font-semibold mb-2">ภาพรวมรายเดือน:</h3>';
+            if (Object.keys(monthlyData).length === 0) {
+                monthlyOverviewHtml += '<p>ไม่มีข้อมูลอุปกรณ์ที่บันทึก</p>';
+            } else {
+                monthlyOverviewHtml += '<ul class="list-disc pl-5">';
+                Object.keys(monthlyData).sort().forEach(monthYear => {
+                    const data = monthlyData[monthYear];
+                    monthlyOverviewHtml += `
+                        <li>
+                            <strong>${monthYear}:</strong> อุปกรณ์ทั้งหมด ${data.total} เครื่อง, พร้อมใช้งาน ${data.ready} เครื่อง, ชำรุด ${data.damaged} เครื่อง, กำลังซ่อม ${data.underRepair} เครื่อง
+                        </li>
+                    `;
+                });
+                monthlyOverviewHtml += '</ul>';
+            }
+
+
+            mainContent.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">ภาพรวมอุปกรณ์</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-blue-100 p-4 rounded-lg shadow-sm text-center">
+                        <p class="text-lg font-medium">จำนวนอุปกรณ์ทั้งหมด</p>
+                        <p class="text-4xl font-bold text-blue-700">${total} เครื่อง</p>
+                    </div>
+                    <div class="bg-green-100 p-4 rounded-lg shadow-sm text-center">
+                        <p class="text-lg font-medium">พร้อมใช้งาน</p>
+                        <p class="text-4xl font-bold text-green-700">${ready} เครื่อง</p>
+                    </div>
+                    <div class="bg-yellow-100 p-4 rounded-lg shadow-sm text-center">
+                        <p class="text-lg font-medium">ชำรุด</p>
+                        <p class="text-4xl font-bold text-yellow-700">${damaged} เครื่อง</p>
+                    </div>
+                    <div class="bg-red-100 p-4 rounded-lg shadow-sm text-center">
+                        <p class="text-lg font-medium">กำลังซ่อม</p>
+                        <p class="text-4xl font-bold text-red-700">${underRepair} เครื่อง</p>
+                    </div>
+                </div>
+                ${monthlyOverviewHtml}
+            `;
+        }
+
+        function loadReportsContent() {
+            mainContent.innerHTML = `
+                <h1 class="text-3xl font-bold mb-6">รายงานอุปกรณ์</h1>
+                <p class="mb-4">หน้านี้จะแสดงรายงานสรุปข้อมูลอุปกรณ์ทั้งหมด คุณสามารถพิมพ์รายงานได้จากหน้านี้</p>
+                <button class="button-primary" onclick="printEquipmentReport()">
+                    <i class="fas fa-print mr-2"></i>พิมพ์รายงาน
+                </button>
+                <div id="reportContent" class="mt-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                    <h2 class="text-2xl font-bold mb-4">รายงานสรุปอุปกรณ์แผนกวิสัญญี</h2>
+                    <p class="mb-2"><strong>วันที่สร้างรายงาน:</strong> ${new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    <hr class="my-4">
+                    <h3 class="text-xl font-semibold mb-2">ภาพรวมสถานะอุปกรณ์:</h3>
+                    <ul class="list-disc pl-5 mb-4">
+                        <li>จำนวนอุปกรณ์ทั้งหมด: ${equipmentData.length} เครื่อง</li>
+                        <li>พร้อมใช้งาน: ${equipmentData.filter(eq => eq.status === 'พร้อมใช้งาน').length} เครื่อง</li>
+                        <li>ชำรุด: ${equipmentData.filter(eq => eq.status === 'ชำรุด').length} เครื่อง</li>
+                        <li>กำลังซ่อม: ${equipmentData.filter(eq => eq.status === 'กำลังซ่อม').length} เครื่อง</li>
+                    </ul>
+                    <h3 class="text-xl font-semibold mb-2">รายละเอียดอุปกรณ์:</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr>
+                                    <th>หมวดหมู่</th>
+                                    <th>ชื่ออุปกรณ์</th>
+                                    <th>หมายเลขเครื่อง</th>
+                                    <th>ประจำอยู่ที่</th>
+                                    <th>Maintenance</th>
+                                    <th>Calibration</th>
+                                    <th>สถานะ</th>
+                                    <th>หมายเหตุส่งซ่อม</th>
+                                    <th>วันที่บันทึก</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${equipmentData.map(eq => `
+                                    <tr>
+                                        <td>${eq.category}</td>
+                                        <td>${eq.equipmentName}</td>
+                                        <td>${eq.serialNumber}</td>
+                                        <td>${eq.location}</td>
+                                        <td>${eq.maintenanceStart || '-'} - ${eq.maintenanceEnd || '-'}</td>
+                                        <td>${eq.calibrationStart || '-'} - ${eq.calibrationEnd || '-'}</td>
+                                        <td>${eq.status}</td>
+                                        <td>${eq.repairNotes || '-'}</td>
+                                        <td>${eq.dateRecorded || '-'}</td>
+                                    </tr>
+                                `).join('')}
+                                ${equipmentData.length === 0 ? '<tr><td colspan="9" class="text-center">ไม่มีข้อมูลอุปกรณ์</td></tr>' : ''}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Print function
+        function printEquipmentReport() {
+            const printContent = document.getElementById('reportContent').innerHTML;
+            const originalBody = document.body.innerHTML;
+            document.body.innerHTML = printContent;
+            window.print();
+            document.body.innerHTML = originalBody; // Restore original content after printing
+            // Re-attach event listeners for header links after restoring body content
+            document.getElementById('manage-equipment-link').addEventListener('click', () => {
+                setActiveLink(document.getElementById('manage-equipment-link'));
+                loadManageEquipmentContent();
+            });
+            document.getElementById('equipment-overview-link').addEventListener('click', () => {
+                setActiveLink(document.getElementById('equipment-overview-link'));
+                loadEquipmentOverviewContent();
+            });
+            document.getElementById('reports-link').addEventListener('click', () => {
+                setActiveLink(document.getElementById('reports-link'));
+                loadReportsContent();
+            });
+            // Ensure the active link is reset correctly after print
+            setActiveLink(document.getElementById('reports-link'));
+        }
+
+    </script>
+</body>
+</html>
